@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ToolBox — 在线工具集</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+/* ToolBox v2 — Full Design System Applied
+   Design tokens from spec:
+   --bg #0F1117 | --card #1A1D27 | --border #2A2D3A | --accent #00D4AA
+   --text #F5F5F0 | --muted #6B7280 | --success #4ADE80 | --error #F87171
+   --warning #FBBF24 | --info #60A5FA
+   Fonts: JetBrains Mono 400/500/600/700 (display) + IBM Plex Sans 400/500/600 (body)
+   Radius: 6px | Transition: 180ms ease
+*/
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:           #0F1117;
+  --card:         #1A1D27;
+  --card-hover:   #1E2130;
+  --border:       #2A2D3A;
+  --border-focus: #00D4AA;
+  --accent:       #00D4AA;
+  --accent-dim:   rgba(0, 212, 170, 0.10);
+  --accent-glow:  rgba(0, 212, 170, 0.18);
+  --text:         #F5F5F0;
+  --muted:        #6B7280;
+  --muted-light:  #9CA3AF;
+  --success:      #4ADE80;
+  --error:        #F87171;
+  --warning:      #FBBF24;
+  --info:         #60A5FA;
+  --code-bg:      #080A10;
+  --font-mono:    'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans:    'IBM Plex Sans', system-ui, sans-serif;
+  --radius:       6px;
+  --radius-sm:    4px;
+  --transition:   180ms ease;
+  --transition-md: 320ms ease;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px;
+  --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.65;
+  min-height: 100vh;
+}
+
+/* ── NAV ──────────────────────────────────────────────────────────────────── */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba(15, 17, 23, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+  /* Subtle bracket glow on hover */
+  transition: text-shadow var(--transition);
+}
+.logo:hover { text-shadow: 0 0 16px rgba(0,212,170,0.5); }
+
+.nav-filters {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+}
+
+.filter-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  padding: 4px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+}
+.filter-btn:hover { color: var(--text); border-color: var(--border); }
+.filter-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* Tool count badge */
+.nav-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.lang-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+  flex-shrink: 0;
+}
+.lang-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── HERO ─────────────────────────────────────────────────────────────────── */
+.hero {
+  border-bottom: 1px solid var(--border);
+  padding: 52px 28px 44px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle grid pattern background */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+/* Accent glow in top-right */
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(0,212,170,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.hero-title {
+  font-family: var(--font-mono);
+  font-size: clamp(30px, 4vw, 52px);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1.5px;
+  line-height: 1.08;
+  margin-bottom: 20px;
+}
+
+/* Accent bracket highlight on hero title */
+.hero-title .bracket { color: var(--accent); }
+
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 4px 12px;
+}
+
+.hero-pill-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── MAIN GRID ────────────────────────────────────────────────────────────── */
+.main {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 32px 28px 80px;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+@media (max-width: 1080px) { .tools-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  {
+  .tools-grid { grid-template-columns: 1fr; }
+  .hero { padding: 36px 16px 32px; }
+  .main { padding: 20px 16px 56px; }
+  .nav-inner { padding: 0 16px; }
+  .nav-count { display: none; }
+}
+
+/* ── TOOL CARD ────────────────────────────────────────────────────────────── */
+.tool-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  /* Spec: border-color 180ms ease on hover */
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+  animation: cardFadeUp 0.42s ease both;
+  position: relative;
+}
+
+/* Hover state: border → accent, card-dot → accent */
+.tool-card:hover {
+  border-color: var(--accent);
+  background: var(--card-hover);
+  box-shadow: 0 0 0 1px rgba(0,212,170,0.08), 0 4px 24px rgba(0,0,0,0.3);
+}
+
+.tool-card:hover .card-dot { background: var(--accent); }
+.tool-card:hover .card-icon { color: var(--accent); opacity: 1; }
+
+/* Stagger entrance — 12 cards × 50ms */
+.tool-card:nth-child(1)  { animation-delay: 0.04s; }
+.tool-card:nth-child(2)  { animation-delay: 0.09s; }
+.tool-card:nth-child(3)  { animation-delay: 0.14s; }
+.tool-card:nth-child(4)  { animation-delay: 0.19s; }
+.tool-card:nth-child(5)  { animation-delay: 0.24s; }
+.tool-card:nth-child(6)  { animation-delay: 0.29s; }
+.tool-card:nth-child(7)  { animation-delay: 0.34s; }
+.tool-card:nth-child(8)  { animation-delay: 0.39s; }
+.tool-card:nth-child(9)  { animation-delay: 0.44s; }
+.tool-card:nth-child(10) { animation-delay: 0.49s; }
+.tool-card:nth-child(11) { animation-delay: 0.54s; }
+.tool-card:nth-child(12) { animation-delay: 0.59s; }
+
+@keyframes cardFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── CARD HEADER ──────────────────────────────────────────────────────────── */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 2px;
+}
+
+/* Status dot — 7px, transitions from border to accent on hover */
+.card-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background var(--transition);
+  flex-shrink: 0;
+}
+
+/* Category tag — uppercase mono 11px */
+.card-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── CARD ICON ────────────────────────────────────────────────────────────── */
+.card-icon {
+  width: 34px; height: 34px;
+  color: var(--accent);
+  opacity: 0.85;
+  transition: opacity var(--transition);
+  margin-top: 2px;
+}
+.card-icon svg { width: 100%; height: 100%; }
+
+/* ── CARD TEXT ────────────────────────────────────────────────────────────── */
+/* Tool name: JetBrains Mono 600 15px */
+.card-title {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+/* Description: IBM Plex Sans 400 13px muted */
+.card-desc {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  flex: 1;
+}
+
+/* ── CARD TOGGLE BUTTON ───────────────────────────────────────────────────── */
+/* Spec: outlined, border #2A2D3A, text #00D4AA, mono 12px */
+.card-toggle {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+  margin-top: 4px;
+}
+.card-toggle:hover { background: var(--accent-dim); border-color: var(--accent); }
+.card-toggle.is-open { border-color: var(--accent); background: var(--accent-dim); }
+
+/* ── CARD PANEL (accordion) ───────────────────────────────────────────────── */
+/* Spec: max-height 320ms ease */
+.card-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-md);
+}
+.card-panel.open { max-height: 1400px; }
+
+.panel-inner {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  margin-top: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ── UPLOAD ZONE ──────────────────────────────────────────────────────────── */
+/* Spec: dashed border, hover → teal border + accent-dim bg */
+.upload-zone {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 22px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), color var(--transition);
+  position: relative;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--text);
+}
+.upload-zone input[type="file"] {
+  position: absolute; inset: 0;
+  opacity: 0; cursor: pointer;
+  width: 100%; height: 100%;
+}
+
+/* Upload icon hint */
+.upload-zone::before {
+  content: '↑';
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--border);
+  margin-bottom: 6px;
+  transition: color var(--transition);
+}
+.upload-zone:hover::before { color: var(--accent); }
+
+/* ── FORM ELEMENTS ────────────────────────────────────────────────────────── */
+/* Spec: bg #080A10, border #2A2D3A, focus border #00D4AA */
+.code-textarea {
+  width: 100%;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.65;
+  padding: 10px 12px;
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.code-textarea:focus { border-color: var(--accent); }
+
+.text-input {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color var(--transition);
+  flex: 1;
+}
+.text-input:focus { border-color: var(--accent); }
+.text-input.mono { font-family: var(--font-mono); font-size: 12px; }
+
+select {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 7px 10px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+select:focus { border-color: var(--accent); }
+
+/* ── BUTTONS ──────────────────────────────────────────────────────────────── */
+/* Primary: bg #00D4AA, text #0F1117, mono 13px 600 */
+.btn-primary {
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  color: #0F1117;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: opacity var(--transition), box-shadow var(--transition);
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover {
+  opacity: 0.88;
+  box-shadow: 0 0 12px rgba(0,212,170,0.3);
+}
+.btn-primary:active { opacity: 0.75; }
+
+/* Secondary: transparent, border #2A2D3A, text #F5F5F0 */
+.btn-secondary {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* Copy: transparent, border #2A2D3A, text muted */
+.btn-copy {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition);
+}
+.btn-copy:hover, .btn-copy.copied { border-color: var(--accent); color: var(--accent); }
+
+/* Inline copy (small) */
+.btn-copy-inline {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 9px;
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition);
+  flex-shrink: 0;
+}
+.btn-copy-inline:hover, .btn-copy-inline.copied { border-color: var(--accent); color: var(--accent); }
+
+.btn-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.panel-actions { display: flex; gap: var(--space-2); }
+
+/* ── STATUS BAR ───────────────────────────────────────────────────────────── */
+/* Spec: mono 12px, success #4ADE80, error #F87171 */
+.status-bar {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  min-height: 18px;
+  padding: 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-bar::before {
+  content: '';
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  opacity: 0;
+}
+.status-bar.ok  { color: var(--success); }
+.status-bar.ok::before  { background: var(--success); opacity: 1; }
+.status-bar.err { color: var(--error); }
+.status-bar.err::before { background: var(--error); opacity: 1; }
+
+/* ── CODE OUTPUT ──────────────────────────────────────────────────────────── */
+.code-output {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 280px;
+  overflow-y: auto;
+  line-height: 1.65;
+}
+
+/* ── RANGE INPUTS ─────────────────────────────────────────────────────────── */
+.range-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--muted);
+}
+.range-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+.range-row span {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+  min-width: 54px;
+  text-align: right;
+}
+
+/* ── SELECT ROW ───────────────────────────────────────────────────────────── */
+.select-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ── COLOR PRESETS ────────────────────────────────────────────────────────── */
+.color-presets {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.color-label { font-size: 13px; color: var(--muted); }
+.color-swatch {
+  width: 26px; height: 26px;
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform var(--transition), border-color var(--transition);
+}
+.color-swatch:hover { transform: scale(1.18); }
+.color-swatch.active { border-color: var(--accent); }
+
+/* ── COMPRESS INFO ────────────────────────────────────────────────────────── */
+.compress-info {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.compress-info .highlight { color: var(--accent); }
+
+/* ── MARKDOWN SPLIT ───────────────────────────────────────────────────────── */
+.md-split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+@media (max-width: 640px) { .md-split { grid-template-columns: 1fr; } }
+.md-editor { height: 240px; resize: none; }
+
+.md-preview {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  overflow-y: auto;
+  height: 240px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.md-preview h1,.md-preview h2,.md-preview h3 { font-family: var(--font-mono); color: var(--accent); margin: 14px 0 6px; }
+.md-preview h1 { font-size: 17px; } .md-preview h2 { font-size: 14px; } .md-preview h3 { font-size: 13px; }
+.md-preview p { margin-bottom: 8px; }
+.md-preview code { background: var(--card); padding: 1px 5px; border-radius: 3px; font-family: var(--font-mono); font-size: 11px; color: var(--accent); }
+.md-preview pre { background: var(--card); padding: 10px; border-radius: var(--radius-sm); overflow-x: auto; margin-bottom: 8px; }
+.md-preview ul,.md-preview ol { padding-left: 18px; margin-bottom: 8px; }
+.md-preview blockquote { border-left: 3px solid var(--accent); padding-left: 10px; color: var(--muted); margin-bottom: 8px; }
+.md-preview a { color: var(--accent); }
+.md-preview strong { color: var(--text); font-weight: 600; }
+.md-preview hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+.md-preview table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 12px; }
+.md-preview th,.md-preview td { border: 1px solid var(--border); padding: 5px 8px; }
+.md-preview th { background: var(--card); color: var(--accent); font-family: var(--font-mono); }
+
+/* ── WORD COUNT STATS ─────────────────────────────────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+.stat-item {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: border-color var(--transition);
+}
+.stat-item:hover { border-color: var(--accent); }
+.stat-val {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+.stat-label { font-size: 11px; color: var(--muted); text-align: center; }
+
+/* ── TIMESTAMP ────────────────────────────────────────────────────────────── */
+.ts-current {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.ts-label { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+.ts-mono { font-family: var(--font-mono); font-size: 13px; color: var(--accent); flex: 1; }
+.input-group { display: flex; flex-direction: column; gap: 6px; }
+.input-group label { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.input-row { display: flex; gap: var(--space-2); }
+.ts-result { font-family: var(--font-mono); font-size: 12px; color: var(--success); min-height: 18px; line-height: 1.5; }
+
+/* ── COLOR PICKER ─────────────────────────────────────────────────────────── */
+.color-main { display: flex; gap: var(--space-4); align-items: flex-start; }
+.color-values { flex: 1; display: flex; flex-direction: column; gap: var(--space-2); }
+.cv-row { display: flex; align-items: center; gap: var(--space-2); font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.cv-row span { min-width: 32px; }
+.shades-row { display: flex; gap: 4px; margin-top: 4px; }
+.shade-swatch {
+  flex: 1; height: 30px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+.shade-swatch:hover { transform: scaleY(1.2); }
+
+/* ── PASSWORD GENERATOR ───────────────────────────────────────────────────── */
+.pwd-display {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+.pwd-text {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text);
+  flex: 1;
+  word-break: break-all;
+  letter-spacing: 0.06em;
+}
+.strength-bar-wrap { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.strength-bar { height: 100%; border-radius: 2px; transition: width 300ms ease, background 300ms ease; width: 0; }
+.strength-label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.cb-label { display: flex; align-items: center; gap: var(--space-2); font-size: 13px; color: var(--muted); cursor: pointer; }
+.cb-label input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; }
+
+/* ── QR CODE ──────────────────────────────────────────────────────────────── */
+.qr-preview {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  background: #fff;
+  border-radius: var(--radius);
+  min-height: 60px;
+}
+.qr-preview canvas { max-width: 200px; }
+
+/* ── RATIO PRESETS ────────────────────────────────────────────────────────── */
+.ratio-presets { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.ratio-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+}
+.ratio-btn:hover, .ratio-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* ── PANEL NOTE ───────────────────────────────────────────────────────────── */
+.panel-note { font-family: var(--font-sans); font-size: 11px; color: var(--muted); font-style: italic; }
+
+/* ── CANVAS ROW ───────────────────────────────────────────────────────────── */
+.canvas-row { display: flex; justify-content: center; }
+
+/* ── FOOTER ───────────────────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--muted);
+}
+.footer-brand { font-family: var(--font-mono); color: var(--accent); font-weight: 600; }
+.footer-sep { color: var(--border); }
+
+/* ── TOAST NOTIFICATION ───────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 28px; right: 28px;
+  background: var(--card);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 10px 18px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 200ms ease, transform 200ms ease;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+#toast::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+
+/* ── HIDDEN CARDS ─────────────────────────────────────────────────────────── */
+.tool-card.hidden { display: none; }
+
+/* ── SCROLLBAR ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── REDUCED MOTION ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .tool-card { animation: none; }
+  * { transition-duration: 0ms !important; }
+}
+
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="logo" href="#">[TB]</a>
+      <div class="nav-filters" id="navFilters">
+        <button class="filter-btn active" data-cat="all"   data-zh="全部" data-en="All">全部</button>
+        <button class="filter-btn" data-cat="image" data-zh="图片" data-en="Image">图片</button>
+        <button class="filter-btn" data-cat="text"  data-zh="文本" data-en="Text">文本</button>
+        <button class="filter-btn" data-cat="util"  data-zh="工具" data-en="Utility">工具</button>
+      </div>
+      <span class="nav-count" id="navCount" data-zh="12 个工具" data-en="12 tools">12 个工具</span>
+      <button class="lang-btn" id="langBtn">EN</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="hero-eyebrow" data-zh="纯本地运行 · 无需上传 · 中英双语" data-en="Runs locally · No upload · Bilingual">纯本地运行 · 无需上传 · 中英双语</p>
+      <h1 class="hero-title">
+        <span class="bracket" data-zh="打开即用的" data-en="Open.">打开即用的</span><span data-zh="工具箱" data-en=" Use. Done.">工具箱</span>
+      </h1>
+      <div class="hero-meta">
+        <span class="hero-pill"><span class="hero-pill-dot"></span><span data-zh="12 个工具" data-en="12 tools">12 个工具</span></span>
+        <span class="hero-pill"><span class="hero-pill-dot"></span><span data-zh="图片处理" data-en="Image tools">图片处理</span></span>
+        <span class="hero-pill"><span class="hero-pill-dot"></span><span data-zh="文本工具" data-en="Text tools">文本工具</span></span>
+        <span class="hero-pill"><span class="hero-pill-dot"></span><span data-zh="实用计算" data-en="Utilities">实用计算</span></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- TOOLS GRID -->
+  <main class="main">
+    <div class="tools-grid" id="toolsGrid">
+
+      <!-- 1. 证件照换背景 -->
+      <div class="tool-card" data-cat="image" data-id="id-photo">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="图片" data-en="Image">图片</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="9" r="3"/><path d="M6 21c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="证件照换背景" data-en="ID Photo Background">证件照换背景</h3>
+        <p class="card-desc" data-zh="替换证件照背景色，支持红、蓝、白等常用颜色" data-en="Replace ID photo background with red, blue, white and more">替换证件照背景色，支持红、蓝、白等常用颜色</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <div class="upload-zone" id="idPhotoUpload">
+              <span data-zh="拖入图片或点击选择" data-en="Drop image or click to select">拖入图片或点击选择</span>
+              <input type="file" accept="image/*" id="idPhotoInput" />
+            </div>
+            <div class="color-presets" id="idBgColors">
+              <span class="color-label" data-zh="背景色：" data-en="Background:">背景色：</span>
+              <button class="color-swatch active" data-color="#1565C0" style="background:#1565C0" title="证件蓝"></button>
+              <button class="color-swatch" data-color="#C62828" style="background:#C62828" title="证件红"></button>
+              <button class="color-swatch" data-color="#FFFFFF" style="background:#FFFFFF;border:1px solid #444" title="白色"></button>
+              <button class="color-swatch" data-color="#4CAF50" style="background:#4CAF50" title="绿色"></button>
+              <button class="color-swatch" data-color="#9C27B0" style="background:#9C27B0" title="紫色"></button>
+              <input type="color" id="idCustomColor" title="自定义" style="width:26px;height:26px;border:none;background:none;cursor:pointer;border-radius:4px;" />
+            </div>
+            <div class="canvas-row">
+              <canvas id="idPhotoCanvas" style="display:none;max-width:100%;border-radius:4px;"></canvas>
+            </div>
+            <div class="panel-actions" id="idPhotoActions" style="display:none;">
+              <button class="btn-primary" id="idPhotoDownload" data-zh="下载图片" data-en="Download">下载图片</button>
+            </div>
+            <p class="panel-note" data-zh="* 纯前端处理，图片不会上传到任何服务器" data-en="* Processed locally, image never leaves your device">* 纯前端处理，图片不会上传到任何服务器</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 图片压缩 -->
+      <div class="tool-card" data-cat="image" data-id="img-compress">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="图片" data-en="Image">图片</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="图片压缩" data-en="Image Compressor">图片压缩</h3>
+        <p class="card-desc" data-zh="在浏览器内压缩图片，调整质量与尺寸，减小文件体积" data-en="Compress images in browser, adjust quality and size">在浏览器内压缩图片，调整质量与尺寸，减小文件体积</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <div class="upload-zone" id="compressUpload">
+              <span data-zh="拖入图片或点击选择" data-en="Drop image or click to select">拖入图片或点击选择</span>
+              <input type="file" accept="image/*" id="compressInput" />
+            </div>
+            <div class="range-row">
+              <label data-zh="质量：" data-en="Quality:">质量：</label>
+              <input type="range" id="compressQuality" min="10" max="100" value="75" />
+              <span id="compressQualityVal">75%</span>
+            </div>
+            <div class="range-row">
+              <label data-zh="最大宽度：" data-en="Max Width:">最大宽度：</label>
+              <input type="range" id="compressMaxW" min="200" max="4000" step="100" value="1920" />
+              <span id="compressMaxWVal">1920px</span>
+            </div>
+            <div id="compressInfo" class="compress-info" style="display:none;"></div>
+            <canvas id="compressCanvas" style="display:none;"></canvas>
+            <div class="panel-actions" id="compressActions" style="display:none;">
+              <button class="btn-primary" id="compressDownload" data-zh="下载压缩图" data-en="Download">下载压缩图</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 图片格式转换 -->
+      <div class="tool-card" data-cat="image" data-id="img-convert">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="图片" data-en="Image">图片</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="图片格式转换" data-en="Image Converter">图片格式转换</h3>
+        <p class="card-desc" data-zh="PNG / JPG / WebP / BMP 互转，本地处理无损转换" data-en="Convert between PNG / JPG / WebP / BMP locally">PNG / JPG / WebP / BMP 互转，本地处理无损转换</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <div class="upload-zone" id="convertUpload">
+              <span data-zh="拖入图片或点击选择" data-en="Drop image or click to select">拖入图片或点击选择</span>
+              <input type="file" accept="image/*" id="convertInput" />
+            </div>
+            <div class="select-row">
+              <label data-zh="转换为：" data-en="Convert to:">转换为：</label>
+              <select id="convertFormat">
+                <option value="image/png">PNG</option>
+                <option value="image/jpeg">JPG</option>
+                <option value="image/webp">WebP</option>
+                <option value="image/bmp">BMP</option>
+              </select>
+            </div>
+            <canvas id="convertCanvas" style="display:none;"></canvas>
+            <div id="convertPreview" style="display:none;margin-top:12px;">
+              <img id="convertPreviewImg" style="max-width:100%;max-height:200px;border-radius:4px;" />
+            </div>
+            <div class="panel-actions" id="convertActions" style="display:none;">
+              <button class="btn-primary" id="convertDownload" data-zh="下载转换图" data-en="Download">下载转换图</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 图片裁剪 -->
+      <div class="tool-card" data-cat="image" data-id="img-crop">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="图片" data-en="Image">图片</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 2 6 8 2 8"/><polyline points="18 22 18 16 22 16"/><path d="M2 8h14a2 2 0 012 2v10"/><path d="M22 16H8a2 2 0 01-2-2V4"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="图片裁剪" data-en="Image Cropper">图片裁剪</h3>
+        <p class="card-desc" data-zh="自由裁剪图片，支持常用比例预设（1:1、4:3、16:9）" data-en="Crop images freely or with preset ratios (1:1, 4:3, 16:9)">自由裁剪图片，支持常用比例预设（1:1、4:3、16:9）</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <div class="upload-zone" id="cropUpload">
+              <span data-zh="拖入图片或点击选择" data-en="Drop image or click to select">拖入图片或点击选择</span>
+              <input type="file" accept="image/*" id="cropInput" />
+            </div>
+            <div class="ratio-presets" id="ratioPresets" style="display:none;">
+              <span class="color-label" data-zh="比例：" data-en="Ratio:">比例：</span>
+              <button class="ratio-btn active" data-ratio="free" data-zh="自由" data-en="Free">自由</button>
+              <button class="ratio-btn" data-ratio="1:1">1:1</button>
+              <button class="ratio-btn" data-ratio="4:3">4:3</button>
+              <button class="ratio-btn" data-ratio="16:9">16:9</button>
+              <button class="ratio-btn" data-ratio="3:4">3:4</button>
+            </div>
+            <div id="cropContainer" style="display:none;position:relative;overflow:hidden;background:#080A10;border-radius:4px;margin-top:12px;">
+              <canvas id="cropCanvas" style="display:block;max-width:100%;cursor:crosshair;"></canvas>
+              <canvas id="cropOverlay" style="position:absolute;top:0;left:0;pointer-events:none;"></canvas>
+            </div>
+            <div class="panel-actions" id="cropActions" style="display:none;">
+              <button class="btn-primary" id="cropDownload" data-zh="下载裁剪图" data-en="Download">下载裁剪图</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. JSON 格式化 -->
+      <div class="tool-card" data-cat="text" data-id="json-fmt">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="文本" data-en="Text">文本</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="JSON 格式化" data-en="JSON Formatter">JSON 格式化</h3>
+        <p class="card-desc" data-zh="格式化、压缩、校验 JSON，高亮显示错误位置" data-en="Format, minify, and validate JSON with error highlighting">格式化、压缩、校验 JSON，高亮显示错误位置</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <textarea id="jsonInput" class="code-textarea" placeholder='{"key": "value"}' rows="6"></textarea>
+            <div class="btn-row">
+              <button class="btn-secondary" id="jsonFormat" data-zh="格式化" data-en="Format">格式化</button>
+              <button class="btn-secondary" id="jsonMinify" data-zh="压缩" data-en="Minify">压缩</button>
+              <button class="btn-secondary" id="jsonClear" data-zh="清空" data-en="Clear">清空</button>
+              <button class="btn-copy" id="jsonCopy" data-zh="复制" data-en="Copy">复制</button>
+            </div>
+            <div id="jsonStatus" class="status-bar"></div>
+            <pre id="jsonOutput" class="code-output" style="display:none;"></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Base64 编解码 -->
+      <div class="tool-card" data-cat="text" data-id="base64">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="文本" data-en="Text">文本</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="Base64 编解码" data-en="Base64 Encode/Decode">Base64 编解码</h3>
+        <p class="card-desc" data-zh="文本与 Base64 互转，支持 Unicode 中文字符" data-en="Encode/decode text and Base64, supports Unicode">文本与 Base64 互转，支持 Unicode 中文字符</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <textarea id="b64Input" class="code-textarea" placeholder="输入文本或 Base64 字符串..." rows="4"></textarea>
+            <div class="btn-row">
+              <button class="btn-secondary" id="b64Encode" data-zh="编码 →" data-en="Encode →">编码 →</button>
+              <button class="btn-secondary" id="b64Decode" data-zh="← 解码" data-en="← Decode">← 解码</button>
+              <button class="btn-copy" id="b64Copy" data-zh="复制结果" data-en="Copy Result">复制结果</button>
+            </div>
+            <div id="b64Status" class="status-bar"></div>
+            <textarea id="b64Output" class="code-textarea" placeholder="结果..." rows="4" readonly></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Markdown 预览 -->
+      <div class="tool-card" data-cat="text" data-id="md-preview">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="文本" data-en="Text">文本</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="Markdown 预览" data-en="Markdown Preview">Markdown 预览</h3>
+        <p class="card-desc" data-zh="实时预览 Markdown 渲染效果，左编辑右预览" data-en="Live Markdown preview with side-by-side editor">实时预览 Markdown 渲染效果，左编辑右预览</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <div class="md-split">
+              <textarea id="mdInput" class="code-textarea md-editor" placeholder="# 标题&#10;&#10;**粗体** _斜体_&#10;&#10;- 列表项" rows="10"></textarea>
+              <div id="mdPreview" class="md-preview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. 字数统计 -->
+      <div class="tool-card" data-cat="text" data-id="word-count">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="文本" data-en="Text">文本</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="字数统计" data-en="Word Counter">字数统计</h3>
+        <p class="card-desc" data-zh="统计字符数、单词数、行数、段落数，支持中英文" data-en="Count characters, words, lines, paragraphs for any text">统计字符数、单词数、行数、段落数，支持中英文</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <textarea id="wcInput" class="code-textarea" placeholder="粘贴或输入文本..." rows="8"></textarea>
+            <div class="stats-grid">
+              <div class="stat-item"><span class="stat-val" id="wcChars">0</span><span class="stat-label" data-zh="字符" data-en="Chars">字符</span></div>
+              <div class="stat-item"><span class="stat-val" id="wcCharsNoSpace">0</span><span class="stat-label" data-zh="去空格" data-en="No space">去空格</span></div>
+              <div class="stat-item"><span class="stat-val" id="wcWords">0</span><span class="stat-label" data-zh="单词" data-en="Words">单词</span></div>
+              <div class="stat-item"><span class="stat-val" id="wcLines">0</span><span class="stat-label" data-zh="行数" data-en="Lines">行数</span></div>
+              <div class="stat-item"><span class="stat-val" id="wcParas">0</span><span class="stat-label" data-zh="段落" data-en="Paras">段落</span></div>
+              <div class="stat-item"><span class="stat-val" id="wcChinese">0</span><span class="stat-label" data-zh="汉字" data-en="CJK">汉字</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. 时间戳转换 -->
+      <div class="tool-card" data-cat="util" data-id="timestamp">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="工具" data-en="Utility">工具</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="时间戳转换" data-en="Timestamp Converter">时间戳转换</h3>
+        <p class="card-desc" data-zh="Unix 时间戳与可读日期互转，支持秒/毫秒" data-en="Convert Unix timestamps to readable dates and back">Unix 时间戳与可读日期互转，支持秒/毫秒</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <div class="ts-current">
+              <span class="ts-label" data-zh="当前时间戳：" data-en="Now:">当前时间戳：</span>
+              <span id="tsNow" class="ts-mono"></span>
+              <button class="btn-copy-inline" id="tsNowCopy" data-zh="复制" data-en="Copy">复制</button>
+            </div>
+            <div class="input-group">
+              <label data-zh="时间戳 → 日期" data-en="Timestamp → Date">时间戳 → 日期</label>
+              <div class="input-row">
+                <input type="text" id="tsInput" class="text-input" placeholder="1700000000" />
+                <button class="btn-secondary" id="tsConvert" data-zh="转换" data-en="Convert">转换</button>
+              </div>
+              <div id="tsResult" class="ts-result"></div>
+            </div>
+            <div class="input-group">
+              <label data-zh="日期 → 时间戳" data-en="Date → Timestamp">日期 → 时间戳</label>
+              <div class="input-row">
+                <input type="datetime-local" id="dtInput" class="text-input" />
+                <button class="btn-secondary" id="dtConvert" data-zh="转换" data-en="Convert">转换</button>
+              </div>
+              <div id="dtResult" class="ts-result"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. 颜色选择器 -->
+      <div class="tool-card" data-cat="util" data-id="color-picker">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="工具" data-en="Utility">工具</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke-dasharray="2 2"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="颜色选择器" data-en="Color Picker">颜色选择器</h3>
+        <p class="card-desc" data-zh="HEX / RGB / HSL 互转，生成色阶与配色方案" data-en="Convert HEX / RGB / HSL, generate shades and palettes">HEX / RGB / HSL 互转，生成色阶与配色方案</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <div class="color-main">
+              <input type="color" id="colorPicker" value="#00D4AA" style="width:60px;height:60px;border:none;background:none;cursor:pointer;border-radius:6px;" />
+              <div class="color-values">
+                <div class="cv-row">
+                  <span>HEX</span>
+                  <input type="text" id="colorHex" class="text-input mono" value="#00D4AA" />
+                  <button class="btn-copy-inline" data-copy="colorHex" data-zh="复制" data-en="Copy">复制</button>
+                </div>
+                <div class="cv-row">
+                  <span>RGB</span>
+                  <input type="text" id="colorRgb" class="text-input mono" readonly />
+                  <button class="btn-copy-inline" data-copy="colorRgb" data-zh="复制" data-en="Copy">复制</button>
+                </div>
+                <div class="cv-row">
+                  <span>HSL</span>
+                  <input type="text" id="colorHsl" class="text-input mono" readonly />
+                  <button class="btn-copy-inline" data-copy="colorHsl" data-zh="复制" data-en="Copy">复制</button>
+                </div>
+              </div>
+            </div>
+            <div class="shades-row" id="colorShades"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 11. 密码生成器 -->
+      <div class="tool-card" data-cat="util" data-id="pwd-gen">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="工具" data-en="Utility">工具</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="密码生成器" data-en="Password Generator">密码生成器</h3>
+        <p class="card-desc" data-zh="生成高强度随机密码，自定义长度与字符类型" data-en="Generate strong random passwords with custom options">生成高强度随机密码，自定义长度与字符类型</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <div class="pwd-display">
+              <span id="pwdResult" class="pwd-text" data-zh="点击生成密码" data-en="Click to generate">点击生成密码</span>
+              <button class="btn-copy-inline" id="pwdCopy" data-zh="复制" data-en="Copy">复制</button>
+            </div>
+            <div class="strength-bar-wrap">
+              <div class="strength-bar" id="strengthBar"></div>
+            </div>
+            <span class="strength-label" id="strengthLabel"></span>
+            <div class="range-row">
+              <label data-zh="长度：" data-en="Length:">长度：</label>
+              <input type="range" id="pwdLength" min="6" max="64" value="16" />
+              <span id="pwdLengthVal">16</span>
+            </div>
+            <div class="checkbox-grid">
+              <label class="cb-label"><input type="checkbox" id="pwdUpper" checked /> <span data-zh="大写 A-Z" data-en="Uppercase A-Z">大写 A-Z</span></label>
+              <label class="cb-label"><input type="checkbox" id="pwdLower" checked /> <span data-zh="小写 a-z" data-en="Lowercase a-z">小写 a-z</span></label>
+              <label class="cb-label"><input type="checkbox" id="pwdNum" checked /> <span data-zh="数字 0-9" data-en="Numbers 0-9">数字 0-9</span></label>
+              <label class="cb-label"><input type="checkbox" id="pwdSym" /> <span data-zh="符号 !@#$" data-en="Symbols !@#$">符号 !@#$</span></label>
+            </div>
+            <button class="btn-primary" id="pwdGenBtn" data-zh="生成密码" data-en="Generate">生成密码</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 12. 二维码生成 -->
+      <div class="tool-card" data-cat="util" data-id="qrcode">
+        <div class="card-header">
+          <span class="card-dot"></span>
+          <span class="card-tag" data-zh="工具" data-en="Utility">工具</span>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="6" y="6" width="1" height="1" fill="currentColor"/><rect x="17" y="6" width="1" height="1" fill="currentColor"/><rect x="6" y="17" width="1" height="1" fill="currentColor"/><path d="M14 14h1v1h-1zM17 14h1v1h-1zM20 14h1v1h-1zM14 17h1v1h-1zM17 17h1v1h-1zM20 17h1v1h-1zM14 20h1v1h-1zM17 20h1v1h-1zM20 20h1v1h-1z" fill="currentColor" stroke="none"/></svg>
+        </div>
+        <h3 class="card-title" data-zh="二维码生成" data-en="QR Code Generator">二维码生成</h3>
+        <p class="card-desc" data-zh="输入文字或网址，即时生成可下载的二维码" data-en="Generate downloadable QR codes from text or URLs">输入文字或网址，即时生成可下载的二维码</p>
+        <button class="card-toggle" data-zh="开始使用" data-en="Open Tool">开始使用</button>
+        <div class="card-panel">
+          <div class="panel-inner">
+            <textarea id="qrInput" class="code-textarea" placeholder="https://example.com 或任意文字..." rows="3"></textarea>
+            <div class="select-row">
+              <label data-zh="纠错级别：" data-en="Error Correction:">纠错级别：</label>
+              <select id="qrLevel">
+                <option value="L">L — 低 (7%)</option>
+                <option value="M" selected>M — 中 (15%)</option>
+                <option value="Q">Q — 较高 (25%)</option>
+                <option value="H">H — 高 (30%)</option>
+              </select>
+            </div>
+            <div class="qr-preview" id="qrPreview">
+              <canvas id="qrCanvas"></canvas>
+            </div>
+            <div class="panel-actions">
+              <button class="btn-primary" id="qrGenBtn" data-zh="生成二维码" data-en="Generate QR">生成二维码</button>
+              <button class="btn-secondary" id="qrDownload" style="display:none;" data-zh="下载 PNG" data-en="Download PNG">下载 PNG</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tools-grid -->
+  </main>
+
+  <footer class="footer">
+    <span class="footer-brand">[TB]</span>
+    <span class="footer-sep">·</span>
+    <span data-zh="纯前端 · 数据不离开你的设备" data-en="Pure frontend · Data never leaves your device">纯前端 · 数据不离开你的设备</span>
+    <span class="footer-sep">·</span>
+    <span>ToolBox v2</span>
+  </footer>
+
+  <script>
+/* ToolBox v2 — script.js
+   Design system applied: toast notifications, status indicators,
+   button feedback, card hover states, stagger entrance
+*/
+
+// ── TOAST SYSTEM ──────────────────────────────────────────────────────────
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2000);
+}
+
+// ── LANGUAGE SYSTEM ────────────────────────────────────────────────────────
+let currentLang = 'zh';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.documentElement.lang = lang === 'zh' ? 'zh' : 'en';
+  document.getElementById('langBtn').textContent = lang === 'zh' ? 'EN' : '中';
+
+  document.querySelectorAll('[data-zh]').forEach(el => {
+    const val = el.getAttribute('data-' + lang);
+    if (val === null) return;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.placeholder = val;
+    } else {
+      el.textContent = val;
+    }
+  });
+
+  // Hero title special handling
+  const heroTitle = document.querySelector('.hero-title');
+  if (heroTitle) {
+    const bracket = heroTitle.querySelector('.bracket');
+    const rest    = heroTitle.querySelectorAll('span')[1];
+    if (lang === 'zh') {
+      if (bracket) bracket.textContent = '打开即用的';
+      if (rest)    rest.textContent    = '工具箱';
+    } else {
+      if (bracket) bracket.textContent = 'Open.';
+      if (rest)    rest.textContent    = ' Use. Done.';
+    }
+  }
+
+  // Update filter buttons
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    const v = btn.getAttribute('data-' + lang);
+    if (v) btn.textContent = v;
+  });
+
+  // Update open card-toggle buttons
+  document.querySelectorAll('.card-toggle.is-open').forEach(btn => {
+    btn.textContent = lang === 'zh' ? '收起' : 'Close';
+  });
+
+  // Specific placeholders
+  const b64Input = document.getElementById('b64Input');
+  if (b64Input) b64Input.placeholder = lang === 'zh' ? '输入文本或 Base64 字符串...' : 'Enter text or Base64 string...';
+  const qrInput = document.getElementById('qrInput');
+  if (qrInput) qrInput.placeholder = lang === 'zh' ? 'https://example.com 或任意文字...' : 'https://example.com or any text...';
+  const wcInput = document.getElementById('wcInput');
+  if (wcInput) wcInput.placeholder = lang === 'zh' ? '粘贴或输入文本...' : 'Paste or type text...';
+}
+
+document.getElementById('langBtn').addEventListener('click', () => {
+  setLang(currentLang === 'zh' ? 'en' : 'zh');
+});
+
+// ── CATEGORY FILTER ────────────────────────────────────────────────────────
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const cat = btn.dataset.cat;
+    let visible = 0;
+    document.querySelectorAll('.tool-card').forEach(card => {
+      const show = cat === 'all' || card.dataset.cat === cat;
+      card.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    const countEl = document.getElementById('navCount');
+    if (countEl) {
+      countEl.textContent = currentLang === 'zh' ? `${visible} 个工具` : `${visible} tools`;
+    }
+  });
+});
+
+// ── CARD ACCORDION ─────────────────────────────────────────────────────────
+document.querySelectorAll('.card-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const card  = btn.closest('.tool-card');
+    const panel = card.querySelector('.card-panel');
+    const isOpen = panel.classList.contains('open');
+    panel.classList.toggle('open', !isOpen);
+    btn.classList.toggle('is-open', !isOpen);
+    btn.textContent = isOpen
+      ? (currentLang === 'zh' ? '开始使用' : 'Open Tool')
+      : (currentLang === 'zh' ? '收起' : 'Close');
+  });
+});
+
+// ── COPY HELPER ────────────────────────────────────────────────────────────
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = currentLang === 'zh' ? '已复制' : 'Copied!';
+    btn.classList.add('copied');
+    showToast(currentLang === 'zh' ? '已复制到剪贴板' : 'Copied to clipboard');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+// ── DOWNLOAD CANVAS ────────────────────────────────────────────────────────
+function downloadCanvas(canvas, filename) {
+  const a = document.createElement('a');
+  a.download = filename;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+// ── TOOL 1: 证件照换背景 ──────────────────────────────────────────────────
+(function() {
+  const upload  = document.getElementById('idPhotoUpload');
+  const input   = document.getElementById('idPhotoInput');
+  const canvas  = document.getElementById('idPhotoCanvas');
+  const ctx     = canvas.getContext('2d');
+  const actions = document.getElementById('idPhotoActions');
+  const dlBtn   = document.getElementById('idPhotoDownload');
+  const customColor = document.getElementById('idCustomColor');
+  let selectedColor = '#1565C0';
+  let originalImage = null;
+
+  upload.addEventListener('dragover', e => { e.preventDefault(); upload.classList.add('drag-over'); });
+  upload.addEventListener('dragleave', () => upload.classList.remove('drag-over'));
+  upload.addEventListener('drop', e => {
+    e.preventDefault(); upload.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) processIdPhoto(file);
+  });
+  input.addEventListener('change', e => { if (e.target.files[0]) processIdPhoto(e.target.files[0]); });
+
+  document.querySelectorAll('#idBgColors .color-swatch').forEach(sw => {
+    sw.addEventListener('click', () => {
+      document.querySelectorAll('#idBgColors .color-swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+      selectedColor = sw.dataset.color;
+      if (originalImage) applyBackground();
+    });
+  });
+
+  customColor.addEventListener('input', () => {
+    selectedColor = customColor.value;
+    document.querySelectorAll('#idBgColors .color-swatch').forEach(s => s.classList.remove('active'));
+    if (originalImage) applyBackground();
+  });
+
+  function processIdPhoto(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => { originalImage = img; applyBackground(); };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function applyBackground() {
+    const img = originalImage;
+    canvas.width = img.width; canvas.height = img.height;
+    ctx.fillStyle = selectedColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const tmp = document.createElement('canvas');
+    tmp.width = img.width; tmp.height = img.height;
+    const tc = tmp.getContext('2d');
+    tc.drawImage(img, 0, 0);
+    const imageData = tc.getImageData(0, 0, img.width, img.height);
+    const data = imageData.data;
+    const corners = [[0,0],[img.width-1,0],[0,img.height-1],[img.width-1,img.height-1]];
+    let bgR=0,bgG=0,bgB=0,cnt=0;
+    corners.forEach(([x,y]) => {
+      const i=(y*img.width+x)*4;
+      bgR+=data[i]; bgG+=data[i+1]; bgB+=data[i+2]; cnt++;
+    });
+    bgR=Math.round(bgR/cnt); bgG=Math.round(bgG/cnt); bgB=Math.round(bgB/cnt);
+    const threshold=60;
+    for (let i=0;i<data.length;i+=4) {
+      const r=data[i],g=data[i+1],b=data[i+2];
+      const dist=Math.sqrt((r-bgR)**2+(g-bgG)**2+(b-bgB)**2);
+      if (dist<threshold) data[i+3]=0;
+      else if (dist<threshold*1.5) data[i+3]=Math.round(255*((dist-threshold)/(threshold*0.5)));
+    }
+    tc.putImageData(imageData,0,0);
+    ctx.drawImage(tmp,0,0);
+    canvas.style.display='block';
+    actions.style.display='flex';
+  }
+
+  dlBtn.addEventListener('click', () => { downloadCanvas(canvas,'id-photo.png'); showToast(currentLang==='zh'?'图片已下载':'Image downloaded'); });
+})();
+
+// ── TOOL 2: 图片压缩 ──────────────────────────────────────────────────────
+(function() {
+  const upload=document.getElementById('compressUpload'),input=document.getElementById('compressInput');
+  const quality=document.getElementById('compressQuality'),qualVal=document.getElementById('compressQualityVal');
+  const maxW=document.getElementById('compressMaxW'),maxWVal=document.getElementById('compressMaxWVal');
+  const canvas=document.getElementById('compressCanvas'),ctx=canvas.getContext('2d');
+  const info=document.getElementById('compressInfo'),actions=document.getElementById('compressActions');
+  const dlBtn=document.getElementById('compressDownload');
+  let originalFile=null,originalImg=null;
+
+  upload.addEventListener('dragover',e=>{e.preventDefault();upload.classList.add('drag-over');});
+  upload.addEventListener('dragleave',()=>upload.classList.remove('drag-over'));
+  upload.addEventListener('drop',e=>{e.preventDefault();upload.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadImage(f);});
+  input.addEventListener('change',e=>{if(e.target.files[0])loadImage(e.target.files[0]);});
+  quality.addEventListener('input',()=>{qualVal.textContent=quality.value+'%';if(originalImg)compress();});
+  maxW.addEventListener('input',()=>{maxWVal.textContent=maxW.value+'px';if(originalImg)compress();});
+
+  function loadImage(file) {
+    originalFile=file;
+    const reader=new FileReader();
+    reader.onload=e=>{const img=new Image();img.onload=()=>{originalImg=img;compress();};img.src=e.target.result;};
+    reader.readAsDataURL(file);
+  }
+
+  function compress() {
+    const mw=parseInt(maxW.value);
+    let w=originalImg.width,h=originalImg.height;
+    if(w>mw){h=Math.round(h*mw/w);w=mw;}
+    canvas.width=w;canvas.height=h;
+    ctx.drawImage(originalImg,0,0,w,h);
+    const q=parseInt(quality.value)/100;
+    canvas.toBlob(blob=>{
+      const origKB=Math.round(originalFile.size/1024);
+      const newKB=Math.round(blob.size/1024);
+      const ratio=Math.round((1-blob.size/originalFile.size)*100);
+      info.style.display='block';
+      info.innerHTML=`原始：<span class="highlight">${originalImg.width}×${originalImg.height}</span> / <span class="highlight">${origKB} KB</span><br>压缩后：<span class="highlight">${w}×${h}</span> / <span class="highlight">${newKB} KB</span><br>节省：<span class="highlight">${ratio>0?ratio:0}%</span>`;
+      actions.style.display='flex';
+    },'image/jpeg',q);
+  }
+
+  dlBtn.addEventListener('click',()=>{
+    const q=parseInt(quality.value)/100;
+    canvas.toBlob(blob=>{
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download='compressed.jpg';a.click();
+      URL.revokeObjectURL(url);
+      showToast(currentLang==='zh'?'压缩图已下载':'Compressed image downloaded');
+    },'image/jpeg',q);
+  });
+})();
+
+// ── TOOL 3: 图片格式转换 ──────────────────────────────────────────────────
+(function() {
+  const upload=document.getElementById('convertUpload'),input=document.getElementById('convertInput');
+  const format=document.getElementById('convertFormat');
+  const canvas=document.getElementById('convertCanvas'),ctx=canvas.getContext('2d');
+  const preview=document.getElementById('convertPreview'),prevImg=document.getElementById('convertPreviewImg');
+  const actions=document.getElementById('convertActions'),dlBtn=document.getElementById('convertDownload');
+  let currentImg=null;
+
+  upload.addEventListener('dragover',e=>{e.preventDefault();upload.classList.add('drag-over');});
+  upload.addEventListener('dragleave',()=>upload.classList.remove('drag-over'));
+  upload.addEventListener('drop',e=>{e.preventDefault();upload.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadConvert(f);});
+  input.addEventListener('change',e=>{if(e.target.files[0])loadConvert(e.target.files[0]);});
+  format.addEventListener('change',()=>{if(currentImg)doConvert();});
+
+  function loadConvert(file) {
+    const reader=new FileReader();
+    reader.onload=e=>{const img=new Image();img.onload=()=>{currentImg=img;doConvert();};img.src=e.target.result;};
+    reader.readAsDataURL(file);
+  }
+
+  function doConvert() {
+    canvas.width=currentImg.width;canvas.height=currentImg.height;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(format.value==='image/jpeg'){ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,canvas.width,canvas.height);}
+    ctx.drawImage(currentImg,0,0);
+    const dataUrl=canvas.toDataURL(format.value);
+    prevImg.src=dataUrl;preview.style.display='block';actions.style.display='flex';
+  }
+
+  dlBtn.addEventListener('click',()=>{
+    const ext=format.value.split('/')[1].replace('jpeg','jpg');
+    const a=document.createElement('a');a.href=canvas.toDataURL(format.value);a.download=`converted.${ext}`;a.click();
+    showToast(currentLang==='zh'?'转换图已下载':'Converted image downloaded');
+  });
+})();
+
+// ── TOOL 4: 图片裁剪 ──────────────────────────────────────────────────────
+(function() {
+  const upload=document.getElementById('cropUpload'),input=document.getElementById('cropInput');
+  const container=document.getElementById('cropContainer');
+  const canvas=document.getElementById('cropCanvas'),overlay=document.getElementById('cropOverlay');
+  const ratioPresets=document.getElementById('ratioPresets');
+  const actions=document.getElementById('cropActions'),dlBtn=document.getElementById('cropDownload');
+  const ctx=canvas.getContext('2d'),octx=overlay.getContext('2d');
+  let img=null,ratio='free',dragging=false,startX=0,startY=0,cropRect=null,scaleX=1,scaleY=1;
+
+  upload.addEventListener('dragover',e=>{e.preventDefault();upload.classList.add('drag-over');});
+  upload.addEventListener('dragleave',()=>upload.classList.remove('drag-over'));
+  upload.addEventListener('drop',e=>{e.preventDefault();upload.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/'))loadCrop(f);});
+  input.addEventListener('change',e=>{if(e.target.files[0])loadCrop(e.target.files[0]);});
+
+  document.querySelectorAll('.ratio-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.ratio-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');ratio=btn.dataset.ratio;cropRect=null;if(img)drawOverlay();
+    });
+  });
+
+  function loadCrop(file) {
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const i=new Image();
+      i.onload=()=>{
+        img=i;
+        const maxW=500,dispW=Math.min(img.width,maxW),dispH=Math.round(img.height*dispW/img.width);
+        canvas.width=dispW;canvas.height=dispH;
+        overlay.width=dispW;overlay.height=dispH;
+        overlay.style.width=dispW+'px';overlay.style.height=dispH+'px';
+        scaleX=img.width/dispW;scaleY=img.height/dispH;
+        ctx.drawImage(img,0,0,dispW,dispH);
+        container.style.display='block';ratioPresets.style.display='flex';
+        cropRect=null;drawOverlay();
+      };
+      i.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  overlay.addEventListener('mousedown',e=>{const r=overlay.getBoundingClientRect();startX=e.clientX-r.left;startY=e.clientY-r.top;dragging=true;cropRect=null;});
+  overlay.addEventListener('mousemove',e=>{
+    if(!dragging)return;
+    const r=overlay.getBoundingClientRect();let ex=e.clientX-r.left,ey=e.clientY-r.top;
+    let w=ex-startX,h=ey-startY;
+    if(ratio!=='free'){const[rw,rh]=ratio.split(':').map(Number);const asp=rw/rh;if(Math.abs(w)/Math.abs(h)>asp)h=Math.sign(h)*Math.abs(w)/asp;else w=Math.sign(w)*Math.abs(h)*asp;}
+    cropRect={x:startX,y:startY,w,h};drawOverlay();
+  });
+  overlay.addEventListener('mouseup',()=>{dragging=false;if(cropRect)actions.style.display='flex';});
+  overlay.addEventListener('mouseleave',()=>{if(dragging)dragging=false;});
+
+  overlay.addEventListener('touchstart',e=>{const t=e.touches[0];const r=overlay.getBoundingClientRect();startX=t.clientX-r.left;startY=t.clientY-r.top;dragging=true;cropRect=null;e.preventDefault();},{passive:false});
+  overlay.addEventListener('touchmove',e=>{
+    if(!dragging)return;
+    const t=e.touches[0];const r=overlay.getBoundingClientRect();let ex=t.clientX-r.left,ey=t.clientY-r.top;
+    let w=ex-startX,h=ey-startY;
+    if(ratio!=='free'){const[rw,rh]=ratio.split(':').map(Number);const asp=rw/rh;if(Math.abs(w)/Math.abs(h)>asp)h=Math.sign(h)*Math.abs(w)/asp;else w=Math.sign(w)*Math.abs(h)*asp;}
+    cropRect={x:startX,y:startY,w,h};drawOverlay();e.preventDefault();
+  },{passive:false});
+  overlay.addEventListener('touchend',()=>{dragging=false;if(cropRect)actions.style.display='flex';});
+
+  function drawOverlay() {
+    octx.clearRect(0,0,overlay.width,overlay.height);
+    if(!cropRect)return;
+    const{x,y,w,h}=cropRect;
+    octx.fillStyle='rgba(0,0,0,0.5)';octx.fillRect(0,0,overlay.width,overlay.height);
+    octx.clearRect(x,y,w,h);
+    octx.strokeStyle='#00D4AA';octx.lineWidth=1.5;octx.strokeRect(x,y,w,h);
+    // Corner handles
+    const hs=6;octx.fillStyle='#00D4AA';
+    [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([cx,cy])=>octx.fillRect(cx-hs/2,cy-hs/2,hs,hs));
+  }
+
+  dlBtn.addEventListener('click',()=>{
+    if(!cropRect||!img)return;
+    let{x,y,w,h}=cropRect;
+    if(w<0){x+=w;w=-w;}if(h<0){y+=h;h=-h;}
+    const sx=Math.round(x*scaleX),sy=Math.round(y*scaleY),sw=Math.round(w*scaleX),sh=Math.round(h*scaleY);
+    const out=document.createElement('canvas');out.width=sw;out.height=sh;
+    out.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,sw,sh);
+    downloadCanvas(out,'cropped.png');
+    showToast(currentLang==='zh'?'裁剪图已下载':'Cropped image downloaded');
+  });
+})();
+
+// ── TOOL 5: JSON 格式化 ───────────────────────────────────────────────────
+(function() {
+  const input=document.getElementById('jsonInput'),output=document.getElementById('jsonOutput');
+  const status=document.getElementById('jsonStatus');
+  const fmtBtn=document.getElementById('jsonFormat'),minBtn=document.getElementById('jsonMinify');
+  const clrBtn=document.getElementById('jsonClear'),cpyBtn=document.getElementById('jsonCopy');
+
+  function setStatus(msg, type) {
+    status.textContent = msg;
+    status.className = 'status-bar ' + type;
+  }
+
+  fmtBtn.addEventListener('click',()=>{
+    try{const p=JSON.parse(input.value.trim());output.textContent=JSON.stringify(p,null,2);output.style.display='block';setStatus(currentLang==='zh'?'✓ JSON 有效':'✓ Valid JSON','ok');}
+    catch(e){setStatus((currentLang==='zh'?'✗ 解析错误：':'✗ Error: ')+e.message,'err');output.style.display='none';}
+  });
+  minBtn.addEventListener('click',()=>{
+    try{const p=JSON.parse(input.value.trim());output.textContent=JSON.stringify(p);output.style.display='block';setStatus(currentLang==='zh'?'✓ 已压缩':'✓ Minified','ok');}
+    catch(e){setStatus((currentLang==='zh'?'✗ 解析错误：':'✗ Error: ')+e.message,'err');}
+  });
+  clrBtn.addEventListener('click',()=>{input.value='';output.textContent='';output.style.display='none';status.textContent='';status.className='status-bar';});
+  cpyBtn.addEventListener('click',()=>{if(output.textContent)copyText(output.textContent,cpyBtn);});
+})();
+
+// ── TOOL 6: Base64 编解码 ─────────────────────────────────────────────────
+(function() {
+  const input=document.getElementById('b64Input'),output=document.getElementById('b64Output');
+  const status=document.getElementById('b64Status');
+  const encBtn=document.getElementById('b64Encode'),decBtn=document.getElementById('b64Decode'),cpyBtn=document.getElementById('b64Copy');
+
+  function setStatus(msg,type){status.textContent=msg;status.className='status-bar '+type;}
+
+  encBtn.addEventListener('click',()=>{
+    try{output.value=btoa(unescape(encodeURIComponent(input.value)));setStatus(currentLang==='zh'?'✓ 编码完成':'✓ Encoded','ok');}
+    catch(e){setStatus(currentLang==='zh'?'✗ 编码失败':'✗ Encode failed','err');}
+  });
+  decBtn.addEventListener('click',()=>{
+    try{output.value=decodeURIComponent(escape(atob(input.value.trim())));setStatus(currentLang==='zh'?'✓ 解码完成':'✓ Decoded','ok');}
+    catch(e){setStatus(currentLang==='zh'?'✗ 无效的 Base64 字符串':'✗ Invalid Base64 string','err');}
+  });
+  cpyBtn.addEventListener('click',()=>{if(output.value)copyText(output.value,cpyBtn);});
+})();
+
+// ── TOOL 7: Markdown 预览 ─────────────────────────────────────────────────
+(function() {
+  const mdInput=document.getElementById('mdInput'),mdPreview=document.getElementById('mdPreview');
+  function render(){if(typeof marked!=='undefined')mdPreview.innerHTML=marked.parse(mdInput.value);}
+  mdInput.addEventListener('input',render);
+  mdInput.value=`# Markdown 预览\n\n**粗体文字** 和 _斜体文字_\n\n## 列表\n- 第一项\n- 第二项\n- 第三项\n\n## 代码\n\`\`\`js\nconsole.log('Hello, World!');\n\`\`\`\n\n> 引用块：这是一段引用文字。\n\n[链接示例](https://example.com)`;
+  render();
+})();
+
+// ── TOOL 8: 字数统计 ──────────────────────────────────────────────────────
+(function() {
+  const input=document.getElementById('wcInput');
+  const els={chars:document.getElementById('wcChars'),charsNoSpace:document.getElementById('wcCharsNoSpace'),words:document.getElementById('wcWords'),lines:document.getElementById('wcLines'),paras:document.getElementById('wcParas'),chinese:document.getElementById('wcChinese')};
+  function update(){
+    const t=input.value;
+    els.chars.textContent=t.length;
+    els.charsNoSpace.textContent=t.replace(/\s/g,'').length;
+    els.words.textContent=t.trim()?t.trim().split(/\s+/).length:0;
+    els.lines.textContent=t?t.split('\n').length:0;
+    els.paras.textContent=t.trim()?t.trim().split(/\n\s*\n/).length:0;
+    els.chinese.textContent=(t.match(/[\u4e00-\u9fa5]/g)||[]).length;
+  }
+  input.addEventListener('input',update);
+})();
+
+// ── TOOL 9: 时间戳转换 ────────────────────────────────────────────────────
+(function() {
+  const tsNow=document.getElementById('tsNow'),tsNowCopy=document.getElementById('tsNowCopy');
+  const tsInput=document.getElementById('tsInput'),tsConvert=document.getElementById('tsConvert'),tsResult=document.getElementById('tsResult');
+  const dtInput=document.getElementById('dtInput'),dtConvert=document.getElementById('dtConvert'),dtResult=document.getElementById('dtResult');
+
+  function updateNow(){tsNow.textContent=Math.floor(Date.now()/1000);}
+  updateNow();setInterval(updateNow,1000);
+  tsNowCopy.addEventListener('click',()=>copyText(tsNow.textContent,tsNowCopy));
+
+  tsConvert.addEventListener('click',()=>{
+    const val=tsInput.value.trim();if(!val)return;
+    let ts=parseInt(val);if(val.length===13)ts=Math.floor(ts/1000);
+    const d=new Date(ts*1000);
+    if(isNaN(d.getTime())){tsResult.textContent=currentLang==='zh'?'无效的时间戳':'Invalid timestamp';tsResult.style.color='var(--error)';}
+    else{tsResult.textContent=d.toLocaleString('zh-CN',{hour12:false})+' · UTC: '+d.toUTCString();tsResult.style.color='var(--success)';}
+  });
+
+  dtConvert.addEventListener('click',()=>{
+    const val=dtInput.value;if(!val)return;
+    const d=new Date(val);
+    dtResult.textContent=`${currentLang==='zh'?'秒':'sec'}: ${Math.floor(d.getTime()/1000)}  ·  ${currentLang==='zh'?'毫秒':'ms'}: ${d.getTime()}`;
+    dtResult.style.color='var(--success)';
+  });
+
+  const now=new Date(),pad=n=>String(n).padStart(2,'0');
+  dtInput.value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+})();
+
+// ── TOOL 10: 颜色选择器 ───────────────────────────────────────────────────
+(function() {
+  const picker=document.getElementById('colorPicker'),hexInput=document.getElementById('colorHex');
+  const rgbInput=document.getElementById('colorRgb'),hslInput=document.getElementById('colorHsl');
+  const shades=document.getElementById('colorShades');
+
+  function hexToRgb(hex){return{r:parseInt(hex.slice(1,3),16),g:parseInt(hex.slice(3,5),16),b:parseInt(hex.slice(5,7),16)};}
+  function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const max=Math.max(r,g,b),min=Math.min(r,g,b);let h,s,l=(max+min)/2;if(max===min){h=s=0;}else{const d=max-min;s=l>0.5?d/(2-max-min):d/(max+min);switch(max){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break;}}return{h:Math.round(h*360),s:Math.round(s*100),l:Math.round(l*100)};}
+  function hslToHex(h,s,l){s/=100;l/=100;const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));return'#'+[f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');}
+
+  function updateFromHex(hex) {
+    if(!/^#[0-9a-fA-F]{6}$/.test(hex))return;
+    const{r,g,b}=hexToRgb(hex);const{h,s,l}=rgbToHsl(r,g,b);
+    picker.value=hex;hexInput.value=hex.toUpperCase();
+    rgbInput.value=`rgb(${r}, ${g}, ${b})`;hslInput.value=`hsl(${h}, ${s}%, ${l}%)`;
+    shades.innerHTML='';
+    for(let i=1;i<=9;i++){
+      const lv=10+(i-1)*10;const shadeHex=hslToHex(h,s,lv);
+      const sw=document.createElement('div');sw.className='shade-swatch';sw.style.background=shadeHex;sw.title=shadeHex;
+      sw.addEventListener('click',()=>{navigator.clipboard.writeText(shadeHex);sw.style.outline='2px solid var(--accent)';showToast(shadeHex+' '+( currentLang==='zh'?'已复制':'copied'));setTimeout(()=>sw.style.outline='',1000);});
+      shades.appendChild(sw);
+    }
+  }
+
+  picker.addEventListener('input',()=>updateFromHex(picker.value));
+  hexInput.addEventListener('input',()=>updateFromHex(hexInput.value));
+
+  document.querySelectorAll('[data-copy]').forEach(btn=>{
+    btn.addEventListener('click',()=>{const val=document.getElementById(btn.dataset.copy).value;copyText(val,btn);});
+  });
+
+  updateFromHex('#00D4AA');
+})();
+
+// ── TOOL 11: 密码生成器 ───────────────────────────────────────────────────
+(function() {
+  const result=document.getElementById('pwdResult'),copyBtn=document.getElementById('pwdCopy');
+  const lengthEl=document.getElementById('pwdLength'),lengthVal=document.getElementById('pwdLengthVal');
+  const upper=document.getElementById('pwdUpper'),lower=document.getElementById('pwdLower');
+  const num=document.getElementById('pwdNum'),sym=document.getElementById('pwdSym');
+  const genBtn=document.getElementById('pwdGenBtn');
+  const strengthBar=document.getElementById('strengthBar'),strengthLabel=document.getElementById('strengthLabel');
+  const UPPER='ABCDEFGHIJKLMNOPQRSTUVWXYZ',LOWER='abcdefghijklmnopqrstuvwxyz';
+  const NUMS='0123456789',SYMS='!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+  lengthEl.addEventListener('input',()=>lengthVal.textContent=lengthEl.value);
+
+  function generate() {
+    let charset='';
+    if(upper.checked)charset+=UPPER;if(lower.checked)charset+=LOWER;
+    if(num.checked)charset+=NUMS;if(sym.checked)charset+=SYMS;
+    if(!charset){result.textContent=currentLang==='zh'?'请至少选择一种字符类型':'Select at least one type';return;}
+    const len=parseInt(lengthEl.value);
+    const arr=new Uint32Array(len);crypto.getRandomValues(arr);
+    result.textContent=Array.from(arr).map(v=>charset[v%charset.length]).join('');
+    updateStrength();
+  }
+
+  function updateStrength() {
+    const pwd=result.textContent;let score=0;
+    if(pwd.length>=8)score++;if(pwd.length>=12)score++;if(pwd.length>=16)score++;
+    if(/[A-Z]/.test(pwd))score++;if(/[a-z]/.test(pwd))score++;
+    if(/[0-9]/.test(pwd))score++;if(/[^A-Za-z0-9]/.test(pwd))score++;
+    const pct=Math.round((score/7)*100);
+    strengthBar.style.width=pct+'%';
+    if(score<=2){strengthBar.style.background='var(--error)';strengthLabel.textContent=currentLang==='zh'?'弱':'Weak';}
+    else if(score<=4){strengthBar.style.background='var(--warning)';strengthLabel.textContent=currentLang==='zh'?'中':'Medium';}
+    else if(score<=6){strengthBar.style.background='var(--success)';strengthLabel.textContent=currentLang==='zh'?'强':'Strong';}
+    else{strengthBar.style.background='var(--accent)';strengthLabel.textContent=currentLang==='zh'?'非常强':'Very Strong';}
+  }
+
+  genBtn.addEventListener('click',generate);
+  copyBtn.addEventListener('click',()=>{
+    const t=result.textContent;
+    if(t&&t!=='点击生成密码'&&t!=='Click to generate'&&t!=='请至少选择一种字符类型'&&t!=='Select at least one type')
+      copyText(t,copyBtn);
+  });
+  generate();
+})();
+
+// ── TOOL 12: 二维码生成 ───────────────────────────────────────────────────
+(function() {
+  const input=document.getElementById('qrInput'),level=document.getElementById('qrLevel');
+  const canvas=document.getElementById('qrCanvas'),genBtn=document.getElementById('qrGenBtn'),dlBtn=document.getElementById('qrDownload');
+
+  function generateQR() {
+    const text=input.value.trim();if(!text)return;
+    QRCode.toCanvas(canvas,text,{errorCorrectionLevel:level.value,width:200,margin:2,color:{dark:'#000000',light:'#FFFFFF'}},err=>{
+      if(!err)dlBtn.style.display='inline-flex';
+    });
+  }
+
+  genBtn.addEventListener('click',generateQR);
+  input.addEventListener('input',generateQR);
+  dlBtn.addEventListener('click',()=>{
+    const a=document.createElement('a');a.download='qrcode.png';a.href=canvas.toDataURL('image/png');a.click();
+    showToast(currentLang==='zh'?'二维码已下载':'QR code downloaded');
+  });
+
+  input.value='https://example.com';generateQR();
+})();
+
+</script>
+</body>
+</html>
